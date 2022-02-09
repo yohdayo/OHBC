@@ -4,13 +4,14 @@ import pandas as pd
 import numpy as np
 import MeCab 
 
+#NeologDを利用した各文書の平均ベクトルを求める
 model = word2vec.Word2Vec.load('./data/models/neolog.model')
 
 with open('./data/pickles/train_sent.pkl','rb') as f:
         sentences = pickle.loads(f.read())
 
 wakati = []
-mt = mt_neolog = MeCab.Tagger('-Owakati -d /usr/local/lib/mecab/dic/mecab-ipadic-neologd')
+mt = mt_neolog = MeCab.Tagger('-Owakati -d /home/koichi/src/neologd/dic/')
     
 for i in range(len(sentences)):
     result = mt.parse(sentences[i])
@@ -33,6 +34,7 @@ for line in wakati:
         if wakati_term[i] in model.wv:
             fe = np.reshape(model.wv[wakati_term[i]],(1,100))
             feature_vec = np.add(feature_vec, fe)
+            #print("feature vec=",feature_vec.shape) #shape (1,100)
             count = count + 1
         else:
             print("無かったよ:",wakati_term[i])
@@ -47,6 +49,7 @@ for line in wakati:
 
 
 print(len(vectors))
+print(vectors) #1913x100
 
 with open('./data/pickles/train_vec.pkl','wb') as f:
     f.write(pickle.dumps(vectors))

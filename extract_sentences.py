@@ -32,43 +32,16 @@ def excel2array():
 
 def excel2array2022():
     # 竹内
-    # 2人のアノテータの緊急度を読み込んで高い方(合算して平均四捨五入)をとる
-    print("excel => array")
-    #ディレクトリ内の *.xlsx 
-    bpath = '2021Feb4'
-    mypath = ['県保健医療調整本部','県南西部災害保健医療調整本部','倉敷市保健所内']
-    filename = ['活動記録（石澤）.xlsx']
-    file_list = []
-    for path in mypath:
-        pp = "./data/chronologies/{0}/{1}/*.xlsx".format(bpath,path)
-        print(pp)
-        file_list = glob.glob(pp)
-    print (file_list)
-    ###
-    # 県保健医療調整本部 (活動記録（石澤）.xlsx,活動記録（齋藤）.xlsx)        [792x5]
-    # 県南西部災害保健医療調整本部 
-    #   (県南西部災害保健医療調整本部（石澤）.xlsx,県南西部災害保健医療調整本部（齋藤）.xlsx) [182x5]
-    # 倉敷市保健所内 
-    #   (川崎医科大学附属病院（石澤）.xlsx, 川崎医科大学附属病院（齋藤）.xlsx)[164x5]
-    #   (倉敷市保健所内（石澤）.xlsx, 倉敷市保健所内（齋藤）.xlsx)          [785x5]
-
-    # アノテータ毎に緊急度をとりだして平均して最終結果を作る
-    
-    sent_levels=[]
-    for filename in file_list:
-        df = pd.read_excel(filename,engine='openpyxl')
-        sentence_emergency_level = df[["内容","緊急度"]]
-        #excelシートの内容部分を抽出
-        sent_levels.append(sentence_emergency_level)
+    # set_data.pyで作った文を使う
+    # (理由) 文書かタグが不適切な場合は文書ごと排除した結果整理した文
+    # 　　　データ構造として，文(x)とタグ(y)が別のpickleにまとめられてるため
+    #      不整合を起こさないように同じ文で処理する
+    with open('./data/pickles/train_sent.pkl','rb') as sent:
+        train_sent = pickle.load(sent)
+        print(train_sent)
         
+        return train_sent
 
-    for df_sent_level in sent_levels: #各中身はdataframe型
-        print(df_sent_level)
-        df2_sent_level = df_sent_level.dropna(how='any')
-        print(df2_sent_level)
-    # ここまででとめておく．作ってない．set_data.pyの方が作るべき内容と気がついたため 2022/2 koichi
-    exit(0)
-    return sentences_one
 
 def preprocessing(array):
     print("preprocessing")
@@ -105,8 +78,8 @@ def preprocessing(array):
 def wakatigaki(array):
     print("wakatigaki")
     mt_default = MeCab.Tagger("-Owakati")
-    mt_come = MeCab.Tagger("-Owakati -u /usr/local/lib/mecab/dic/ComeJisyoUtf8-2r1/ComeJisyoUtf8-2r1.dic")
-    mt_neolog = MeCab.Tagger('-Owakati -d /usr/local/lib/mecab/dic/mecab-ipadic-neologd')
+    mt_come = MeCab.Tagger("-Owakati -u /home/koichi/src/comejisho/ComeJisyoUtf8-2r1/ComeJisyoUtf8-2r1.dic")
+    mt_neolog = MeCab.Tagger('-Owakati -d /home/koichi/src/neologd/dic/')
     fo_default = open('./data/wakati.txt', 'w')
     fo_come = open('./data/wakati_ComeJisyo.txt', 'w')
     fo_neolog = open('./data/wakati_neolog.txt', 'w')
@@ -137,7 +110,7 @@ if __name__ == '__main__':
     wakati_default = []
     wakati_come = []
     wakati_neolog = []
-    sentence_array = excel2array()
+    sentence_array = excel2array2022()
     new_sentence_array = preprocessing(sentence_array)
 
     wakati_default, wakati_come, wakati_neolog = wakatigaki(new_sentence_array)

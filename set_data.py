@@ -56,7 +56,7 @@ def make_traindata():
 
     return sentences_one, labels_one
 
-def labelWOnumber(sentences, array):
+def labelWOnumber(sentences, array):    
     labels_num = []
     for i,kanji in enumerate(array):
         if kanji == "低":
@@ -66,13 +66,33 @@ def labelWOnumber(sentences, array):
         elif kanji == "高":
             labels_num.append([0,1])
         else:
-            print(i)
+            print("sentence is deleted due to its wrong tag format =",kanji)
             del sentences[i]
 #重要度の低中高を数字に．それ以外のデータは削除
 #30,64,699,701,708,713,716,719,721が欠損地になる
         
-    print(len(labels_num))
-    print(len(sentences))
+    print("number of lables (final)",len(labels_num))
+    print("number of sentences (final)",len(sentences))
+            
+    labels_num = np.array(labels_num)
+    return sentences, labels_num 
+
+def labelWOnumber3(sentences, array):    
+    # 3クラス分類
+    labels_num = []
+    for i,kanji in enumerate(array):
+        if kanji == "低":
+            labels_num.append([1,0,0])
+        elif kanji == "中":
+            labels_num.append([0,1,0])
+        elif kanji == "高":
+            labels_num.append([0,0,1])
+        else:
+            print("sentence is deleted due to its wrong tag format =",kanji)
+            del sentences[i]
+        
+    print("number of lables (final)",len(labels_num)) # 1913
+    print("number of sentences (final)",len(sentences))
             
     labels_num = np.array(labels_num)
     return sentences, labels_num 
@@ -210,8 +230,8 @@ if __name__ == '__main__':
     sentences = []
     labels_num = []
     sentences, labels = make_train_data2022()
-    train_sent, train_label = labelWOnumber(sentences, labels)
-
+    train_sent, train_label = labelWOnumber(sentences, labels) # 2class 分類
+    _, train_label3 = labelWOnumber3(sentences, labels) # 3 class 分類
 
 
     with open('./data/pickles/train_sent.pkl','wb') as f:
@@ -221,3 +241,6 @@ if __name__ == '__main__':
     with open('./data/pickles/train_label_two.pkl','wb') as f:
         f.write(pickle.dumps(train_label))
         #sentences.pkl に new_sentence_array を保存
+
+    with open('./data/pickles/train_label.pkl','wb') as f:
+        f.write(pickle.dumps(train_label3))
