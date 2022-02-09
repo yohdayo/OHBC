@@ -30,6 +30,45 @@ def excel2array():
     #リストを1列にする．nanを除いた1923の配列
     return sentences_one
 
+def excel2array2022():
+    # 竹内
+    # 2人のアノテータの緊急度を読み込んで高い方(合算して平均四捨五入)をとる
+    print("excel => array")
+    #ディレクトリ内の *.xlsx 
+    bpath = '2021Feb4'
+    mypath = ['県保健医療調整本部','県南西部災害保健医療調整本部','倉敷市保健所内']
+    filename = ['活動記録（石澤）.xlsx']
+    file_list = []
+    for path in mypath:
+        pp = "./data/chronologies/{0}/{1}/*.xlsx".format(bpath,path)
+        print(pp)
+        file_list = glob.glob(pp)
+    print (file_list)
+    ###
+    # 県保健医療調整本部 (活動記録（石澤）.xlsx,活動記録（齋藤）.xlsx)        [792x5]
+    # 県南西部災害保健医療調整本部 
+    #   (県南西部災害保健医療調整本部（石澤）.xlsx,県南西部災害保健医療調整本部（齋藤）.xlsx) [182x5]
+    # 倉敷市保健所内 
+    #   (川崎医科大学附属病院（石澤）.xlsx, 川崎医科大学附属病院（齋藤）.xlsx)[164x5]
+    #   (倉敷市保健所内（石澤）.xlsx, 倉敷市保健所内（齋藤）.xlsx)          [785x5]
+
+    # アノテータ毎に緊急度をとりだして平均して最終結果を作る
+    
+    sent_levels=[]
+    for filename in file_list:
+        df = pd.read_excel(filename,engine='openpyxl')
+        sentence_emergency_level = df[["内容","緊急度"]]
+        #excelシートの内容部分を抽出
+        sent_levels.append(sentence_emergency_level)
+        
+
+    for df_sent_level in sent_levels: #各中身はdataframe型
+        print(df_sent_level)
+        df2_sent_level = df_sent_level.dropna(how='any')
+        print(df2_sent_level)
+    # ここまででとめておく．作ってない．set_data.pyの方が作るべき内容と気がついたため 2022/2 koichi
+    exit(0)
+    return sentences_one
 
 def preprocessing(array):
     print("preprocessing")
